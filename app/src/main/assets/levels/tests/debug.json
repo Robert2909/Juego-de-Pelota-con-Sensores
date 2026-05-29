@@ -1,0 +1,459 @@
+{
+    "levelId": 999,
+    "theme": "industrial",
+    "width": 3920,
+    "height": 3080,
+    "entities": [
+        {
+            "type": "switch",
+            "x": 736,
+            "y": 160,
+            "w": 40,
+            "h": 40,
+            "linkId": "1",
+            "switchMode": "toggle"
+        },
+        {
+            "type": "checkpoint",
+            "x": 220,
+            "y": 520,
+            "w": 40,
+            "h": 40,
+            "checkpointIndex": 1
+        },
+        {
+            "type": "start",
+            "x": 60,
+            "y": 520,
+            "w": 20,
+            "h": 20
+        },
+        {
+            "type": "goal",
+            "x": 460,
+            "y": 20,
+            "w": 40,
+            "h": 40
+        },
+        {
+            "type": "gate",
+            "x": 989,
+            "y": 140,
+            "w": 40,
+            "h": 80,
+            "linkId": "1",
+            "duration": 2
+        },
+        {
+            "type": "gate",
+            "x": 989,
+            "y": 460,
+            "w": 40,
+            "h": 80,
+            "linkId": "3",
+            "duration": 2
+        },
+        {
+            "type": "switch",
+            "x": 736,
+            "y": 480,
+            "w": 40,
+            "h": 40,
+            "linkId": "3",
+            "switchMode": "latch"
+        },
+        {
+            "type": "switch",
+            "x": 736,
+            "y": 320,
+            "w": 40,
+            "h": 40,
+            "linkId": "2",
+            "switchMode": "hold"
+        },
+        {
+            "type": "checkpoint",
+            "x": 280,
+            "y": 520,
+            "w": 40,
+            "h": 40,
+            "checkpointIndex": 2
+        },
+        {
+            "type": "moving_wall",
+            "x": 20,
+            "y": 20,
+            "w": 40,
+            "h": 40,
+            "dx": 100,
+            "dy": 0
+        },
+        {
+            "type": "moving_wall",
+            "x": 20,
+            "y": 80,
+            "w": 40,
+            "h": 40,
+            "dx": 0,
+            "dy": 100
+        },
+        {
+            "type": "moving_hazard",
+            "x": 180,
+            "y": 20,
+            "w": 40,
+            "h": 40,
+            "dx": 100
+        },
+        {
+            "type": "moving_hazard",
+            "x": 180,
+            "y": 80,
+            "w": 40,
+            "h": 40,
+            "dy": 100
+        },
+        {
+            "type": "moving_wall",
+            "x": 340,
+            "y": 20,
+            "w": 40,
+            "h": 40,
+            "dx": 60,
+            "dy": 60
+        },
+        {
+            "type": "moving_hazard",
+            "x": 340,
+            "y": 80,
+            "w": 40,
+            "h": 40,
+            "dx": 60,
+            "dy": -60
+        },
+        {
+            "type": "moving_wall",
+            "x": 0,
+            "y": 760,
+            "w": 40,
+            "h": 80,
+            "dx": 100,
+            "speed": 2
+        },
+        {
+            "type": "switch",
+            "x": 1241,
+            "y": 160,
+            "w": 40,
+            "h": 40,
+            "linkId": "1",
+            "switchMode": "toggle"
+        },
+        {
+            "type": "switch",
+            "x": 1241,
+            "y": 480,
+            "w": 40,
+            "h": 40,
+            "linkId": "3",
+            "switchMode": "latch"
+        },
+        {
+            "type": "spinning_hazard",
+            "x": 1580,
+            "y": 0,
+            "w": 140,
+            "h": 140
+        },
+        {
+            "type": "spinning_hazard",
+            "x": 1520,
+            "y": 0,
+            "w": 60,
+            "h": 60
+        },
+        {
+            "type": "spinning_hazard",
+            "x": 1720,
+            "y": 0,
+            "w": 200,
+            "h": 200
+        },
+        {
+            "type": "moving_wall",
+            "x": 0,
+            "y": 920,
+            "w": 40,
+            "h": 80,
+            "dx": 100,
+            "speed": 0.1
+        },
+        {
+            "type": "logic_gate",
+            "x": 736,
+            "y": 920,
+            "w": 42,
+            "h": 40,
+            "gateType": "AND",
+            "inputLinkIds": "1,2",
+            "outputLinkId": "5"
+        },
+        {
+            "type": "moving_wall",
+            "x": 1410,
+            "y": 920,
+            "w": 40,
+            "h": 40,
+            "linkId": "9",
+            "dy": -200
+        },
+        {
+            "type": "gate",
+            "x": 989,
+            "y": 300,
+            "w": 40,
+            "h": 80,
+            "linkId": "2",
+            "duration": 1
+        },
+        {
+            "type": "gate",
+            "x": 989,
+            "y": 620,
+            "w": 40,
+            "h": 80,
+            "linkId": "4",
+            "duration": 2
+        },
+        {
+            "type": "switch",
+            "x": 736,
+            "y": 640,
+            "w": 40,
+            "h": 40,
+            "linkId": "4",
+            "switchMode": "pulse"
+        },
+        {
+            "type": "switch",
+            "x": 1241,
+            "y": 640,
+            "w": 40,
+            "h": 40,
+            "linkId": "4",
+            "switchMode": "pulse"
+        },
+        {
+            "type": "box",
+            "x": 1494,
+            "y": 940,
+            "w": 120,
+            "h": 120
+        },
+        {
+            "type": "box",
+            "x": 1515,
+            "y": 840,
+            "w": 80,
+            "h": 80
+        },
+        {
+            "type": "box",
+            "x": 1536,
+            "y": 780,
+            "w": 40,
+            "h": 40
+        },
+        {
+            "type": "logic_gate",
+            "x": 1241,
+            "y": 920,
+            "w": 42,
+            "h": 40,
+            "gateType": "OR",
+            "inputLinkIds": "2,3",
+            "outputLinkId": "6"
+        },
+        {
+            "type": "logic_gate",
+            "x": 989,
+            "y": 1020,
+            "w": 42,
+            "h": 40,
+            "gateType": "NOT",
+            "inputLinkIds": "7",
+            "outputLinkId": "8"
+        },
+        {
+            "type": "moving_wall",
+            "x": 0,
+            "y": 840,
+            "w": 40,
+            "h": 80,
+            "dx": 100,
+            "speed": 1
+        },
+        {
+            "type": "moving_wall",
+            "x": 0,
+            "y": 1000,
+            "w": 40,
+            "h": 80,
+            "dx": 100,
+            "speed": 0.01
+        },
+        {
+            "type": "logic_gate",
+            "x": 989,
+            "y": 920,
+            "w": 40,
+            "h": 40,
+            "gateType": "AND",
+            "inputLinkIds": "5,6",
+            "outputLinkId": "7"
+        },
+        {
+            "type": "moving_wall",
+            "x": 460,
+            "y": 760,
+            "w": 40,
+            "h": 80,
+            "dx": -100,
+            "speed": 2
+        },
+        {
+            "type": "moving_wall",
+            "x": 460,
+            "y": 920,
+            "w": 40,
+            "h": 80,
+            "dx": -100,
+            "speed": 0.1
+        },
+        {
+            "type": "moving_wall",
+            "x": 460,
+            "y": 840,
+            "w": 40,
+            "h": 80,
+            "dx": -100,
+            "speed": 1
+        },
+        {
+            "type": "moving_wall",
+            "x": 460,
+            "y": 1000,
+            "w": 40,
+            "h": 80,
+            "dx": -100,
+            "speed": 0.01
+        },
+        {
+            "type": "wind_zone",
+            "x": 0,
+            "y": 2339,
+            "w": 858,
+            "h": 741,
+            "dx": 0,
+            "dy": -1.5
+        },
+        {
+            "type": "speed_pad",
+            "x": 2368,
+            "y": 0,
+            "w": 368,
+            "h": 114,
+            "dx": 0,
+            "dy": 15
+        },
+        {
+            "type": "speed_pad",
+            "x": 2368,
+            "y": 342,
+            "w": 368,
+            "h": 114,
+            "dx": 0,
+            "dy": -15
+        },
+        {
+            "type": "timer",
+            "x": 989,
+            "y": 20,
+            "w": 40,
+            "h": 40,
+            "linkId": "10",
+            "duration": 2,
+            "outputLinkId": "11"
+        },
+        {
+            "type": "switch",
+            "x": 736,
+            "y": 20,
+            "w": 40,
+            "h": 40,
+            "linkId": "10",
+            "switchMode": "pulse"
+        },
+        {
+            "type": "logic_gate",
+            "x": 1241,
+            "y": 1020,
+            "w": 42,
+            "h": 40,
+            "gateType": "NOT",
+            "inputLinkIds": "8",
+            "outputLinkId": "9"
+        },
+        {
+            "type": "gate",
+            "x": 1241,
+            "y": 20,
+            "w": 40,
+            "h": 40,
+            "linkId": "11"
+        },
+        {
+            "type": "portal",
+            "x": 736,
+            "y": 780,
+            "w": 40,
+            "h": 40,
+            "portalId": 1
+        },
+        {
+            "type": "portal",
+            "x": 1241,
+            "y": 780,
+            "w": 40,
+            "h": 40,
+            "portalId": 1
+        },
+        {
+            "type": "switch",
+            "x": 1241,
+            "y": 320,
+            "w": 40,
+            "h": 40,
+            "linkId": "2",
+            "switchMode": "hold"
+        },
+        {
+            "type": "speed_pad",
+            "x": 3430,
+            "y": 0,
+            "w": 490,
+            "h": 114,
+            "dx": 0,
+            "dy": 500
+        },
+        {
+            "type": "speed_pad",
+            "x": 3430,
+            "y": 2966,
+            "w": 490,
+            "h": 114,
+            "dx": 0,
+            "dy": -500
+        }
+    ]
+}
