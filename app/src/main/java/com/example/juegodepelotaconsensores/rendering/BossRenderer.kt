@@ -4,6 +4,7 @@ import android.graphics.*
 import com.example.juegodepelotaconsensores.models.BossData
 import com.example.juegodepelotaconsensores.models.SwitchData
 import com.example.juegodepelotaconsensores.models.GameTheme
+import com.example.juegodepelotaconsensores.models.ProjectileData
 import com.example.juegodepelotaconsensores.engine.ParticleManager
 
 object BossRenderer {
@@ -12,8 +13,27 @@ object BossRenderer {
         canvas: Canvas,
         boss: BossData,
         theme: GameTheme,
-        switches: List<SwitchData>
+        switches: List<SwitchData>,
+        projectiles: List<ProjectileData>
     ) {
+
+        // Dibujar Proyectiles del Jefe
+        val projPaint = Paint().apply {
+            color = Color.parseColor(theme.bossLaserColor)
+            style = Paint.Style.FILL
+            isAntiAlias = true
+            setShadowLayer(10f, 0f, 0f, Color.parseColor(theme.bossLaserColor))
+        }
+        val innerPaint = Paint().apply {
+            color = Color.WHITE
+            style = Paint.Style.FILL
+            isAntiAlias = true
+        }
+        for (proj in projectiles) {
+            canvas.drawCircle(proj.x, proj.y, proj.radius, projPaint)
+            canvas.drawCircle(proj.x, proj.y, proj.radius * 0.4f, innerPaint)
+        }
+
         val now = System.currentTimeMillis()
         val floatY = boss.floatOffset
         val currentRect = RectF(boss.rect).apply { offset(0f, floatY) }
@@ -206,6 +226,22 @@ object BossRenderer {
                     }
                     canvas.drawLine(sw.rect.centerX(), sw.rect.centerY(), cx, cy, laserInner)
                 }
+            }
+        }
+
+        // Onda expansiva en mundo
+        if (boss.isDefeated) {
+            val animationTime = now - boss.lastDamageTime - 2000
+            if (animationTime in 3001..5000) {
+                val waveProgress = (animationTime - 3000) / 2000f
+                val wavePaint = Paint().apply {
+                    style = Paint.Style.STROKE
+                    color = Color.WHITE
+                    alpha = (255 * (1f - waveProgress)).toInt().coerceIn(0, 255)
+                    strokeWidth = 40f * (1f - waveProgress)
+                    isAntiAlias = true
+                }
+                canvas.drawCircle(boss.rect.centerX(), boss.rect.centerY(), waveProgress * 3000f, wavePaint)
             }
         }
     }
