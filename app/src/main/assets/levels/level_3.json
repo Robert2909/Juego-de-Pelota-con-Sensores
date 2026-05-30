@@ -1,6 +1,10 @@
 {
     "levelId": 3,
     "theme": "industrial",
+    "width": 1920,
+    "height": 1080,
+    "gridCols": 96,
+    "gridRows": 54,
     "entities": [
         {
             "type": "start",

@@ -3,6 +3,8 @@
     "theme": "industrial",
     "width": 3920,
     "height": 3080,
+    "gridCols": 196,
+    "gridRows": 154,
     "entities": [
         {
             "type": "switch",
@@ -10,8 +12,8 @@
             "y": 160,
             "w": 40,
             "h": 40,
-            "linkId": "1",
-            "switchMode": "toggle"
+            "switchMode": "toggle",
+            "linkId": "1"
         },
         {
             "type": "checkpoint",
@@ -59,8 +61,8 @@
             "y": 480,
             "w": 40,
             "h": 40,
-            "linkId": "3",
-            "switchMode": "latch"
+            "switchMode": "latch",
+            "linkId": "3"
         },
         {
             "type": "switch",
@@ -68,8 +70,8 @@
             "y": 320,
             "w": 40,
             "h": 40,
-            "linkId": "2",
-            "switchMode": "hold"
+            "switchMode": "hold",
+            "linkId": "2"
         },
         {
             "type": "checkpoint",
@@ -146,8 +148,8 @@
             "y": 160,
             "w": 40,
             "h": 40,
-            "linkId": "1",
-            "switchMode": "toggle"
+            "switchMode": "toggle",
+            "linkId": "1"
         },
         {
             "type": "switch",
@@ -155,8 +157,8 @@
             "y": 480,
             "w": 40,
             "h": 40,
-            "linkId": "3",
-            "switchMode": "latch"
+            "switchMode": "latch",
+            "linkId": "3"
         },
         {
             "type": "spinning_hazard",
@@ -231,8 +233,8 @@
             "y": 640,
             "w": 40,
             "h": 40,
-            "linkId": "4",
-            "switchMode": "pulse"
+            "switchMode": "pulse",
+            "linkId": "4"
         },
         {
             "type": "switch",
@@ -240,8 +242,8 @@
             "y": 640,
             "w": 40,
             "h": 40,
-            "linkId": "4",
-            "switchMode": "pulse"
+            "switchMode": "pulse",
+            "linkId": "4"
         },
         {
             "type": "box",
@@ -382,8 +384,8 @@
             "w": 40,
             "h": 40,
             "linkId": "10",
-            "duration": 2,
-            "outputLinkId": "11"
+            "outputLinkId": "11",
+            "duration": 2
         },
         {
             "type": "switch",
@@ -391,8 +393,8 @@
             "y": 20,
             "w": 40,
             "h": 40,
-            "linkId": "10",
-            "switchMode": "pulse"
+            "switchMode": "pulse",
+            "linkId": "10"
         },
         {
             "type": "logic_gate",
@@ -434,8 +436,8 @@
             "y": 320,
             "w": 40,
             "h": 40,
-            "linkId": "2",
-            "switchMode": "hold"
+            "switchMode": "hold",
+            "linkId": "2"
         },
         {
             "type": "speed_pad",
