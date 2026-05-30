@@ -118,14 +118,8 @@ object BossAIController {
         val currentBossRect = RectF(boss.rect).apply { offset(0f, floatY) }
         
         if (boss.inputLinkId.isNotBlank() && state.signalBus[boss.inputLinkId] == true) {
-            val now = System.currentTimeMillis()
-            if (now - boss.lastDamageTime > 1000) {
-                boss.health -= 1
-                boss.lastDamageTime = now
+            if (boss.takeDamage()) {
                 ParticleManager.triggerBossDamageParticles(currentBossRect.centerX(), currentBossRect.centerY())
-                if (boss.health <= 0) {
-                    boss.isDefeated = true
-                }
             }
         }
         

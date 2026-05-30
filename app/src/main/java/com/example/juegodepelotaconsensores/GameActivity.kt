@@ -32,7 +32,7 @@ import androidx.core.view.WindowInsetsControllerCompat
 import androidx.compose.foundation.BorderStroke
 import com.example.juegodepelotaconsensores.ui.theme.*
 
-class GameActivity : ComponentActivity(), SensorEventListener {
+class GameActivity : ComponentActivity() {
 
     private lateinit var sensorManager: SensorManager
     private var accelerometer: Sensor? = null
@@ -44,6 +44,7 @@ class GameActivity : ComponentActivity(), SensorEventListener {
     private var gameStatus by mutableStateOf("PLAYING") // "PLAYING", "WON", "FAILED"
     private var currentLevelId by mutableIntStateOf(1)
     private var gameView: GameView? = null
+    private var inputController: com.example.juegodepelotaconsensores.engine.input.InputController? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -75,6 +76,10 @@ class GameActivity : ComponentActivity(), SensorEventListener {
                     onLevelComplete = { gameStatus = "WON" }
                     onLevelFailed = { gameStatus = "FAILED" }
                     gameView = this
+                    this@GameActivity.inputController = com.example.juegodepelotaconsensores.engine.input.InputController(this.gameState)
+                    this@GameActivity.accelerometer?.let { acc ->
+                        this@GameActivity.sensorManager.registerListener(this@GameActivity.inputController, acc, android.hardware.SensorManager.SENSOR_DELAY_GAME)
+                    }
                 }
             }
             
@@ -213,29 +218,19 @@ class GameActivity : ComponentActivity(), SensorEventListener {
 
     override fun onResume() {
         super.onResume()
-        accelerometer?.also { acc ->
-            sensorManager.registerListener(this, acc, SensorManager.SENSOR_DELAY_GAME)
+        inputController?.let { controller ->
+            accelerometer?.also { acc ->
+                sensorManager.registerListener(controller, acc, SensorManager.SENSOR_DELAY_GAME)
+            }
         }
     }
 
     override fun onPause() {
         super.onPause()
-        sensorManager.unregisterListener(this)
-    }
-
-    override fun onSensorChanged(event: SensorEvent?) {
-        if (event?.sensor?.type == Sensor.TYPE_ACCELEROMETER) {
-            // Mapeo estándar para modo horizontal sin forzar inversiones manuales
-            val tx = event.values[1]
-            val ty = event.values[0]
-            tiltX = tx
-            tiltY = ty
-            gameView?.let {
-                it.gameState.tiltX = tx
-                it.gameState.tiltY = ty
-            }
+        inputController?.let { controller ->
+            sensorManager.unregisterListener(controller)
         }
     }
 
-    override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
+    
 }

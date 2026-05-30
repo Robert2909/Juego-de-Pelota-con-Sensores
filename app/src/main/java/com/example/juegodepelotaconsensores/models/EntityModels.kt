@@ -76,7 +76,20 @@ data class BossData(
     var checkpointHealth: Int = 3,
     var checkpointPhase: Int = 1,
     var entranceProgress: Float = 0f
-)
+) {
+    fun takeDamage(): Boolean {
+        val now = System.currentTimeMillis()
+        if (now - lastDamageTime > 1000) {
+            health -= 1
+            lastDamageTime = now
+            if (health <= 0) {
+                isDefeated = true
+            }
+            return true
+        }
+        return false
+    }
+}
 
 data class ProjectileData(
     var x: Float,
