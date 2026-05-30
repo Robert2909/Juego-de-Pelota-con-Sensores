@@ -1,10 +1,14 @@
 # Juego de Pelota con Sensores (Motor Nativo)
 
-Un motor físico de lógica y habilidad construido de forma nativa para el sistema operativo Android utilizando el lenguaje Kotlin. El proyecto basa su control en la integración y lectura de los sensores de hardware del dispositivo móvil.
+Un avanzado motor físico de precisión desarrollado íntegramente en lenguaje nativo para el ecosistema Android. Este software desafía las convenciones modernas del desarrollo móvil al cimentar sus propios sistemas de simulación algorítmica desde cero, prescindiendo por completo de la dependencia de motores gráficos de terceros.
 
-## Características del Motor
+## Simulación Inercial y Físicas Matemáticas
 
-- **Físicas Basadas en Gravedad Vectorial**: El controlador principal procesa datos del acelerómetro inyectando vectores de aceleración de forma directa a un Motor de Físicas basado en colisiones AABB (Axis-Aligned Bounding Box), operando sin dependencia de frameworks gráficos externos.
-- **Renderizado Nativo y Ciclo de Vida**: Utiliza componentes avanzados de la UI de Android (Jetpack Compose) combinados con un SurfaceView. El proyecto implementa un Game Loop clásico en un hilo independiente, asegurando la estabilidad del procesamiento lógico.
-- **Inteligencia Artificial y Patrones de Comportamiento**: Incluye controladores lógicos encargados de operar fases de ataque, desplazamiento cinemático paramétrico y rutinas de evaluación de daño para entidades hostiles complejas.
-- **Serialización e Ingesta de Datos**: Arquitectura agnóstica de niveles capaz de interpretar y renderizar mapas estructurados en formato JSON generados por utilidades externas.
+El núcleo de esta tecnología reside en una integración impecable entre el hardware inercial del dispositivo y el universo virtual. Mediante el análisis directo de los datos emitidos por el giroscopio y el acelerómetro del dispositivo, el motor calcula e inyecta vectores de aceleración reales sobre el lienzo. El resultado es un simulador gravitacional orgánico, altamente reactivo, en donde los reflejos y rotaciones físicas interactúan fluidamente con la física digital calculada en microsegundos.
+
+## Características Sobresalientes
+
+- **Gestor Físico Especializado**: Alberga un robusto calculador de colisiones desarrollado a medida, ajustado para iterar operaciones vectoriales complejas, resoluciones de superposición geométrica y fricción aerodinámica con una eficiencia destacable.
+- **Inteligencia Algorítmica Autónoma**: Cuenta con sistemas directivos de comportamiento de alto nivel. Evalúa patrones cinemáticos en tiempo real para orquestar la reacción y desplazamiento de entidades complejas a través de combates de múltiples fases.
+- **Renderizado Nativo de Alto Rendimiento**: Fusiona interfaces declarativas de última generación con un renderizador de superficie ejecutado en su propio hilo de procesamiento, afianzando un estado constante de fluidez gráfica.
+- **Ingesta Dinámica de Universos**: Su núcleo ha sido aislado conceptualmente, funcionando como una máquina de estados pura capaz de materializar estructuras de datos abstractas generadas externamente.
