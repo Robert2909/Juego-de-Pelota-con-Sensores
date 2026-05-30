@@ -231,8 +231,8 @@ class GameActivity : ComponentActivity(), SensorEventListener {
             tiltX = tx
             tiltY = ty
             gameView?.let {
-                it.tiltX = tx
-                it.tiltY = ty
+                it.gameState.tiltX = tx
+                it.gameState.tiltY = ty
             }
         }
     }

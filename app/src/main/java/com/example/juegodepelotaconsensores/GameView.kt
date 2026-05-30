@@ -26,32 +26,13 @@ class GameView @JvmOverloads constructor(
     }
 
     private var activeBgColor = Color.parseColor("#121212")
-
-    private var posX = 0f
-    private var posY = 0f
-    private var velX = 0f
-    private var velY = 0f
-    private var radius = 20f
     private var lastFrameTimeNanos = 0L
     
     // Entidades procesadas para la pantalla actual
-    private val walls = mutableListOf<RectF>()
-    private val hazards = mutableListOf<RectF>()
-    private var goal = RectF()
-    private var startX = 0f
-    private var startY = 0f
-
-    private val trailPoints = mutableListOf<TrailPoint>()
-
-    var tiltX = 0f
-    var tiltY = 0f
 
     // Animación de muerte
-    private var isExploding = false
-    private var explosionTime = 0L
-    private val explosionDuration = 350L
-    private var explosionX = 0f
-    private var explosionY = 0f
+
+    val gameState = GameState()
 
     var onLevelComplete: (() -> Unit)? = null
     var onLevelFailed: (() -> Unit)? = null
@@ -97,43 +78,13 @@ class GameView @JvmOverloads constructor(
     }
 
     // Listas y estados de elementos interactivos
-    private val checkpoints = mutableListOf<CheckpointData>()
-    private var activeCheckpointIndex = -1
-    private var activeCheckpointX: Float? = null
-    private var activeCheckpointY: Float? = null
     private var physicalLevelWidth = 1920f
     private var physicalLevelHeight = 1080f
-
-    private val switches = mutableListOf<SwitchData>()
-    private val activeSwitches = mutableSetOf<Int>()
-
-    private val gates = mutableListOf<GateData>()
-
-
-
-    private val movingEntities = mutableListOf<MovingEntityData>()
-    private val spinningHazards = mutableListOf<SpinningHazardData>()
-    private val logicGates = mutableListOf<LogicGateData>()
-
-
-
-    private val boxes = mutableListOf<BoxData>()
     
     // El Bus de Señales Global
-    private val signalBus = mutableMapOf<String, Boolean>()
-
-    private val windZones = mutableListOf<WindZoneData>()
-    private val speedPads = mutableListOf<SpeedPadData>()
-    private val timers = mutableListOf<TimerData>()
-    private val portals = mutableListOf<PortalData>()
-    private var portalCooldown = 0f
     private var transitionProgress = 0f
-    private var activeBoss: BossData? = null
-    private val bossProjectiles = mutableListOf<ProjectileData>()
 
     private var currentLevel: Level? = null
-    private var currentLevelId: Int = 1
-    private var isLevelCompleted = false
 
     private fun applyTheme(themeName: String) {
         val theme = ThemeManager.getTheme(themeName)
@@ -172,10 +123,10 @@ class GameView @JvmOverloads constructor(
             val pWidth = level.width * scaleX
             val pHeight = level.height * scaleY
             
-            var targetCamX = posX - width / 2f
-            var targetCamY = posY - height / 2f
+            var targetCamX = gameState.posX - width / 2f
+            var targetCamY = gameState.posY - height / 2f
             
-            activeBoss?.let { boss ->
+            gameState.activeBoss?.let { boss ->
                 if (boss.isDefeated) {
                     val now = System.currentTimeMillis()
                     val timeSinceDefeat = now - boss.lastDamageTime
@@ -211,7 +162,7 @@ class GameView @JvmOverloads constructor(
             canvas.translate(-camX, -camY)
             
             // Screen shake dramático
-            activeBoss?.let { boss ->
+            gameState.activeBoss?.let { boss ->
                 if (boss.isDefeated) {
                     val now = System.currentTimeMillis()
                     val timeSinceDefeat = now - boss.lastDamageTime
@@ -237,32 +188,32 @@ class GameView @JvmOverloads constructor(
             
             if (transitionProgress < 1f) {
                 val scale = 0.95f + 0.05f * transitionProgress
-                canvas.scale(scale, scale, posX, posY)
+                canvas.scale(scale, scale, gameState.posX, gameState.posY)
             }
             EnvironmentRenderer.draw(
-                canvas, theme, scaleX, scaleY, walls, hazards, movingEntities, spinningHazards,
-                goal, gates, logicGates, switches, checkpoints, boxes, windZones, speedPads, portals, timers,
-                activeCheckpointIndex, signalBus, wallPaint, hazardPaint, goalPaint, gatePaint, switchPaint, checkpointPaint
+                canvas, theme, scaleX, scaleY, gameState.walls, gameState.hazards, gameState.movingEntities, gameState.spinningHazards,
+                gameState.goal, gameState.gates, gameState.logicGates, gameState.switches, gameState.checkpoints, gameState.boxes, gameState.windZones, gameState.speedPads, gameState.portals, gameState.timers,
+                gameState.activeCheckpointIndex, gameState.signalBus, wallPaint, hazardPaint, goalPaint, gatePaint, switchPaint, checkpointPaint
             )
 
-            if (isExploding) {
+            if (gameState.isExploding) {
                 drawExplosion(canvas)
-            } else if (!isLevelCompleted) {
+            } else if (!gameState.isLevelCompleted) {
                 PlayerRenderer.draw(
                     canvas = canvas,
-                    posX = posX,
-                    posY = posY,
-                    radius = radius,
-                    trailPoints = trailPoints,
+                    posX = gameState.posX,
+                    posY = gameState.posY,
+                    radius = gameState.radius,
+                    trailPoints = gameState.trailPoints,
                     trailPaint = trailPaint,
                     ballPaint = ballPaint,
-                    isLevelCompleted = isLevelCompleted
+                    isLevelCompleted = gameState.isLevelCompleted
                 )
             }
             
             // Dibujar Jefe (Boss) en la capa más alta (incluye proyectiles y onda expansiva)
-            activeBoss?.let { boss ->
-                BossRenderer.draw(canvas, boss, theme, switches, bossProjectiles)
+            gameState.activeBoss?.let { boss ->
+                BossRenderer.draw(canvas, boss, theme, gameState.switches, gameState.bossProjectiles)
             }
             
             // 5. Dibujar partículas activas (efectos de checkpoint/switch/boss)
@@ -273,7 +224,7 @@ class GameView @JvmOverloads constructor(
             if (transitionProgress < 1f) {
                 transitionProgress = Math.min(1f, transitionProgress + 0.03f)
             }
-            UIRenderer.draw(canvas, width, height, activeBoss, theme, isLevelCompleted, transitionProgress)
+            UIRenderer.draw(canvas, width, height, gameState.activeBoss, theme, gameState.isLevelCompleted, transitionProgress)
 
             updatePhysics()
         }
@@ -283,17 +234,17 @@ class GameView @JvmOverloads constructor(
     }
 
     private fun drawExplosion(canvas: Canvas) {
-        val elapsed = System.currentTimeMillis() - explosionTime
-        val progress = elapsed.toFloat() / explosionDuration
+        val elapsed = System.currentTimeMillis() - gameState.explosionTime
+        val progress = elapsed.toFloat() / gameState.explosionDuration
         
         if (progress >= 1f) {
-            isExploding = false
-            if (activeCheckpointIndex == -1) {
+            gameState.isExploding = false
+            if (gameState.activeCheckpointIndex == -1) {
                 onLevelFailed?.invoke()
-                if (currentLevelId == 999 && currentDebugPath != null) {
+                if (gameState.currentLevelId == 999 && currentDebugPath != null) {
                     loadDebugLevel(currentDebugPath!!, showTransition = false)
                 } else {
-                    loadLevel(currentLevelId, showTransition = false)
+                    loadLevel(gameState.currentLevelId, showTransition = false)
                 }
             } else {
                 resetBall(isDeathRespawn = true)
@@ -335,7 +286,7 @@ class GameView @JvmOverloads constructor(
     }
 
     private fun updatePhysics() {
-        if (isExploding || isLevelCompleted) return
+        if (gameState.isExploding || gameState.isLevelCompleted) return
 
         // 1. Calcular delta time para independencia de framerate
         val currentTimeNanos = System.nanoTime()
@@ -353,7 +304,7 @@ class GameView @JvmOverloads constructor(
         if (dt < 0.1f) dt = 0.1f
 
         // Animar la entrada del jefe
-        activeBoss?.let { boss ->
+        gameState.activeBoss?.let { boss ->
             if (boss.entranceProgress < 1f) {
                 boss.entranceProgress += 0.005f * dt
                 if (boss.entranceProgress >= 1f) boss.entranceProgress = 1f
@@ -363,38 +314,38 @@ class GameView @JvmOverloads constructor(
 
         // --- 2. RESOLUCIÓN DE SEÑALES GLOBALES (UNIVERSAL SIGNAL BUS) ---
         SignalEvaluator.evaluate(
-            dt, posX, posY, radius, switches, boxes, logicGates, timers, signalBus
+            dt, gameState.posX, gameState.posY, gameState.radius, gameState.switches, gameState.boxes, gameState.logicGates, gameState.timers, gameState.signalBus
         ) { cx, cy ->
             ParticleManager.triggerSwitchAnimation(cx, cy, currentLevel?.theme ?: "industrial")
         }
 
         // --- 3. INTEGRACIÓN FÍSICA VIA PHYSICS ENGINE ---
         val state = PhysicsState(
-            posX = posX,
-            posY = posY,
-            velX = velX,
-            velY = velY,
-            radius = radius,
-            tiltX = tiltX,
-            tiltY = tiltY,
+            posX = gameState.posX,
+            posY = gameState.posY,
+            velX = gameState.velX,
+            velY = gameState.velY,
+            radius = gameState.radius,
+            tiltX = gameState.tiltX,
+            tiltY = gameState.tiltY,
             physicalLevelWidth = physicalLevelWidth,
             physicalLevelHeight = physicalLevelHeight,
             EDITOR_WIDTH = EDITOR_WIDTH.toFloat(),
             EDITOR_HEIGHT = EDITOR_HEIGHT.toFloat(),
-            activeCheckpointIndex = activeCheckpointIndex,
-            activeCheckpointX = activeCheckpointX,
-            activeCheckpointY = activeCheckpointY,
+            activeCheckpointIndex = gameState.activeCheckpointIndex,
+            activeCheckpointX = gameState.activeCheckpointX,
+            activeCheckpointY = gameState.activeCheckpointY,
             themeName = currentLevel?.theme ?: "industrial",
-            isExploding = isExploding,
-            activeBoss = activeBoss,
-            goal = goal,
-            checkpoints = checkpoints,
-            signalBus = signalBus,
+            isExploding = gameState.isExploding,
+            activeBoss = gameState.activeBoss,
+            goal = gameState.goal,
+            checkpoints = gameState.checkpoints,
+            signalBus = gameState.signalBus,
             onTriggerDeath = { triggerDeath() },
             onLevelComplete = { 
-                this@GameView.isLevelCompleted = true
-                this@GameView.velX = 0f
-                this@GameView.velY = 0f
+                gameState.isLevelCompleted = true
+                gameState.velX = 0f
+                gameState.velY = 0f
                 this@GameView.onLevelComplete?.invoke() 
             },
             onCheckpointActivated = { saveCheckpointState() },
@@ -404,70 +355,70 @@ class GameView @JvmOverloads constructor(
             onTriggerSwitchAnimation = { cx, cy ->
                 ParticleManager.triggerSwitchAnimation(cx, cy, currentLevel?.theme ?: "industrial")
             },
-            portalCooldown = portalCooldown
+            portalCooldown = gameState.portalCooldown
         )
 
         PhysicsEngine.update(
-            state, dt, walls, hazards, gates, switches, boxes, logicGates,
-            movingEntities, spinningHazards, windZones, speedPads, portals, bossProjectiles, trailPoints
+            state, dt, gameState.walls, gameState.hazards, gameState.gates, gameState.switches, gameState.boxes, gameState.logicGates,
+            gameState.movingEntities, gameState.spinningHazards, gameState.windZones, gameState.speedPads, gameState.portals, gameState.bossProjectiles, gameState.trailPoints
         )
 
         // Copiar valores de vuelta
-        posX = state.posX
-        posY = state.posY
-        velX = state.velX
-        velY = state.velY
-        activeCheckpointIndex = state.activeCheckpointIndex
-        activeCheckpointX = state.activeCheckpointX
-        activeCheckpointY = state.activeCheckpointY
-        activeBoss = state.activeBoss
-        portalCooldown = state.portalCooldown
+        gameState.posX = state.posX
+        gameState.posY = state.posY
+        gameState.velX = state.velX
+        gameState.velY = state.velY
+        gameState.activeCheckpointIndex = state.activeCheckpointIndex
+        gameState.activeCheckpointX = state.activeCheckpointX
+        gameState.activeCheckpointY = state.activeCheckpointY
+        gameState.activeBoss = state.activeBoss
+        gameState.portalCooldown = state.portalCooldown
     }
 
     private fun saveCheckpointState() {
         // Enfoque Tipo 1: Snapshot de elementos clave y de progreso permanente
-        for (box in boxes) {
+        for (box in gameState.boxes) {
             box.checkpointRect.set(box.rect)
         }
-        for (sw in switches) {
+        for (sw in gameState.switches) {
             if (sw.switchMode == "toggle") {
                 sw.checkpointToggleActive = sw.isToggleActive
             }
         }
-        activeBoss?.let { boss ->
+        gameState.activeBoss?.let { boss ->
             boss.checkpointHealth = boss.health
             boss.checkpointPhase = boss.currentPhase
         }
     }
 
     private fun triggerDeath() {
-        isExploding = true
-        explosionTime = System.currentTimeMillis()
-        explosionX = posX
-        explosionY = posY
-        velX = 0f
-        velY = 0f
+        gameState.isExploding = true
+        gameState.explosionTime = System.currentTimeMillis()
+        gameState.explosionX = gameState.posX
+        gameState.explosionY = gameState.posY
+        gameState.velX = 0f
+        gameState.velY = 0f
 
         // Generar partículas de explosión basadas en el tema actual
-        ParticleManager.triggerDeath(posX, posY, currentLevel?.theme ?: "industrial")
+        ParticleManager.triggerDeath(gameState.posX, gameState.posY, currentLevel?.theme ?: "industrial")
     }
 
     private fun resetBall(isDeathRespawn: Boolean = false) {
-        posX = activeCheckpointX ?: startX
-        posY = activeCheckpointY ?: startY
-        velX = 0f
-        velY = 0f
-        trailPoints.clear()
+        gameState.posX = gameState.activeCheckpointX ?: gameState.startX
+        gameState.posY = gameState.activeCheckpointY ?: gameState.startY
+        gameState.velX = 0f
+        gameState.velY = 0f
+        gameState.trailPoints.clear()
         lastFrameTimeNanos = 0L // Restablecer temporizador de física
 
-        // Reiniciar puzle al morir para mantener el desafío pero respetar checkpoints
-        activeSwitches.clear()
-        signalBus.clear()
-        for ((index, sw) in switches.withIndex()) {
+        // Reiniciar puzle al morir para mantener el desafío pero respetar gameState.checkpoints
+        gameState.activeSwitches.clear()
+        gameState.signalBus.clear()
+        for ((index, sw) in gameState.switches.withIndex()) {
             if (sw.switchMode == "toggle") {
                 sw.isToggleActive = sw.checkpointToggleActive
                 if (sw.isToggleActive) {
-                    activeSwitches.add(index)
+                    gameState.activeSwitches.add(index)
                 }
             } else {
                 sw.isToggleActive = false
@@ -476,21 +427,21 @@ class GameView @JvmOverloads constructor(
             sw.isHoldActive = false
             sw.visualTimer = 0f
         }
-        for (gate in gates) {
+        for (gate in gameState.gates) {
             gate.isGateOpen = false
             gate.openTimer = 0f
         }
 
         // Reiniciar posiciones de las cajas móviles
         // Reiniciar posiciones de las cajas móviles al último checkpoint
-        for (box in boxes) {
+        for (box in gameState.boxes) {
             box.rect.set(box.checkpointRect)
             box.vx = 0f
             box.vy = 0f
         }
 
         // Reiniciar jefe desde el checkpoint
-        activeBoss?.let { boss ->
+        gameState.activeBoss?.let { boss ->
             boss.health = boss.checkpointHealth
             boss.currentPhase = boss.checkpointPhase
             boss.currentSpeed = boss.baseSpeed
@@ -507,7 +458,7 @@ class GameView @JvmOverloads constructor(
             }
             boss.visualHealth = boss.health.toFloat()
         }
-        bossProjectiles.clear()
+        gameState.bossProjectiles.clear()
     }
 
 
@@ -528,27 +479,27 @@ class GameView @JvmOverloads constructor(
         physicalLevelWidth = level.width * scaleX
         physicalLevelHeight = level.height * scaleY
         
-        radius = 20f * Math.min(scaleX, scaleY)
+        gameState.radius = 20f * Math.min(scaleX, scaleY)
 
-        walls.clear()
-        hazards.clear()
-        checkpoints.clear()
-        switches.clear()
-        gates.clear()
-        movingEntities.clear()
-        spinningHazards.clear()
-        logicGates.clear()
-        boxes.clear()
-        windZones.clear()
-        speedPads.clear()
-        timers.clear()
-        portals.clear()
-        portalCooldown = 0f
-        activeBoss = null
-        bossProjectiles.clear()
-        goal = RectF()
-        startX = 0f
-        startY = 0f
+        gameState.walls.clear()
+        gameState.hazards.clear()
+        gameState.checkpoints.clear()
+        gameState.switches.clear()
+        gameState.gates.clear()
+        gameState.movingEntities.clear()
+        gameState.spinningHazards.clear()
+        gameState.logicGates.clear()
+        gameState.boxes.clear()
+        gameState.windZones.clear()
+        gameState.speedPads.clear()
+        gameState.timers.clear()
+        gameState.portals.clear()
+        gameState.portalCooldown = 0f
+        gameState.activeBoss = null
+        gameState.bossProjectiles.clear()
+        gameState.goal = RectF()
+        gameState.startX = 0f
+        gameState.startY = 0f
 
         for (raw in level.rawEntities) {
             val rx = raw.x * scaleX
@@ -557,9 +508,9 @@ class GameView @JvmOverloads constructor(
             val rh = raw.h * scaleY
 
             when (raw.type) {
-                "wall" -> walls.add(RectF(rx, ry, rx + rw, ry + rh))
-                "hazard" -> hazards.add(RectF(rx, ry, rx + rw, ry + rh))
-                "checkpoint" -> checkpoints.add(CheckpointData(RectF(rx, ry, rx + rw, ry + rh), raw.checkpointIndex ?: 0))
+                "wall" -> gameState.walls.add(RectF(rx, ry, rx + rw, ry + rh))
+                "hazard" -> gameState.hazards.add(RectF(rx, ry, rx + rw, ry + rh))
+                "checkpoint" -> gameState.checkpoints.add(CheckpointData(RectF(rx, ry, rx + rw, ry + rh), raw.checkpointIndex ?: 0))
                 "switch" -> {
                     val rawMode = raw.switchMode ?: "toggle"
                     val mode = when (rawMode) {
@@ -567,7 +518,7 @@ class GameView @JvmOverloads constructor(
                         "trigger" -> "latch"
                         else -> rawMode
                     }
-                    switches.add(
+                    gameState.switches.add(
                         SwitchData(
                             RectF(rx, ry, rx + rw, ry + rh),
                             raw.linkId ?: raw.outputLinkId ?: "",
@@ -575,7 +526,7 @@ class GameView @JvmOverloads constructor(
                         )
                     )
                 }
-                "gate" -> gates.add(
+                "gate" -> gameState.gates.add(
                     GateData(
                         RectF(rx, ry, rx + rw, ry + rh),
                         raw.linkId ?: "",
@@ -583,14 +534,14 @@ class GameView @JvmOverloads constructor(
                         raw.duration
                     )
                 )
-                "box" -> boxes.add(
+                "box" -> gameState.boxes.add(
                     BoxData(
                         rect = RectF(rx, ry, rx + rw, ry + rh)
                     )
                 )
                 "logic_gate" -> {
                     val inputs = raw.inputLinkIds?.split(",")?.map { it.trim() }?.filter { it.isNotEmpty() } ?: emptyList()
-                    logicGates.add(
+                    gameState.logicGates.add(
                         LogicGateData(
                             RectF(rx, ry, rx + rw, ry + rh),
                             raw.gateType ?: "AND",
@@ -602,7 +553,7 @@ class GameView @JvmOverloads constructor(
                 "moving_wall" -> {
                     val dxScaled = (raw.dx ?: 0f) * scaleX
                     val dyScaled = (raw.dy ?: 0f) * scaleY
-                    movingEntities.add(
+                    gameState.movingEntities.add(
                         MovingEntityData(
                             RectF(rx, ry, rx + rw, ry + rh),
                             dxScaled,
@@ -616,7 +567,7 @@ class GameView @JvmOverloads constructor(
                 "moving_hazard" -> {
                     val dxScaled = (raw.dx ?: 0f) * scaleX
                     val dyScaled = (raw.dy ?: 0f) * scaleY
-                    movingEntities.add(
+                    gameState.movingEntities.add(
                         MovingEntityData(
                             RectF(rx, ry, rx + rw, ry + rh),
                             dxScaled,
@@ -631,26 +582,26 @@ class GameView @JvmOverloads constructor(
                     val radiusVal = Math.min(rw, rh) / 2f
                     val cxVal = rx + rw / 2f
                     val cyVal = ry + rh / 2f
-                    spinningHazards.add(
+                    gameState.spinningHazards.add(
                         SpinningHazardData(cxVal, cyVal, radiusVal, raw.linkId?.takeIf { it.isNotBlank() })
                     )
                 }
                 "wind_zone" -> {
                     val fx = raw.dx ?: 0f
                     val fy = raw.dy ?: 0f
-                    windZones.add(
+                    gameState.windZones.add(
                         WindZoneData(RectF(rx, ry, rx + rw, ry + rh), fx, fy)
                     )
                 }
                 "speed_pad" -> {
                     val bx = raw.dx ?: 0f
                     val by = raw.dy ?: 0f
-                    speedPads.add(
+                    gameState.speedPads.add(
                         SpeedPadData(RectF(rx, ry, rx + rw, ry + rh), bx, by)
                     )
                 }
                 "boss" -> {
-                    activeBoss = BossData(
+                    gameState.activeBoss = BossData(
                         rect = RectF(rx, ry, rx + rw, ry + rh),
                         baseRect = RectF(rx, ry, rx + rw, ry + rh),
                         inputLinkId = raw.linkId ?: "",
@@ -674,7 +625,7 @@ class GameView @JvmOverloads constructor(
                     )
                 }
                 "timer" -> {
-                    timers.add(
+                    gameState.timers.add(
                         TimerData(
                             rect = RectF(rx, ry, rx + rw, ry + rh),
                             inputLinkId = raw.linkId ?: raw.inputLinkIds ?: "",
@@ -684,17 +635,17 @@ class GameView @JvmOverloads constructor(
                     )
                 }
                 "portal" -> {
-                    portals.add(
+                    gameState.portals.add(
                         PortalData(
                             rect = RectF(rx, ry, rx + rw, ry + rh),
                             portalId = raw.portalId ?: raw.checkpointIndex ?: 0
                         )
                     )
                 }
-                "goal" -> goal = RectF(rx, ry, rx + rw, ry + rh)
+                "goal" -> gameState.goal = RectF(rx, ry, rx + rw, ry + rh)
                 "start" -> {
-                    startX = rx + rw / 2f
-                    startY = ry + rh / 2f
+                    gameState.startX = rx + rw / 2f
+                    gameState.startY = ry + rh / 2f
                 }
             }
         }
@@ -702,15 +653,15 @@ class GameView @JvmOverloads constructor(
     }
 
     fun loadLevel(levelId: Int, showTransition: Boolean = true) {
-        this.currentLevelId = levelId
-        isExploding = false
-        isLevelCompleted = false
-        activeCheckpointIndex = -1
-        activeCheckpointX = null
-        activeCheckpointY = null
-        activeSwitches.clear()
-        activeBoss = null
-        bossProjectiles.clear()
+        gameState.currentLevelId = levelId
+        gameState.isExploding = false
+        gameState.isLevelCompleted = false
+        gameState.activeCheckpointIndex = -1
+        gameState.activeCheckpointX = null
+        gameState.activeCheckpointY = null
+        gameState.activeSwitches.clear()
+        gameState.activeBoss = null
+        gameState.bossProjectiles.clear()
 
         val level = LevelManager.loadLevel(context, levelId)
         if (level != null) {
@@ -718,7 +669,7 @@ class GameView @JvmOverloads constructor(
             val theme = level.theme ?: "industrial"
             applyTheme(theme)
             processLevelScaling()
-            activeBoss?.entranceProgress = if (showTransition) 0f else 1f
+            gameState.activeBoss?.entranceProgress = if (showTransition) 0f else 1f
             bgRenderer.initBgParticles(theme)
             transitionProgress = if (showTransition) 0f else 1f
             invalidate()
@@ -729,15 +680,15 @@ class GameView @JvmOverloads constructor(
 
     fun loadDebugLevel(path: String, showTransition: Boolean = true) {
         currentDebugPath = path
-        this.currentLevelId = 999
-        isExploding = false
-        isLevelCompleted = false
-        activeCheckpointIndex = -1
-        activeCheckpointX = null
-        activeCheckpointY = null
-        activeSwitches.clear()
-        activeBoss = null
-        bossProjectiles.clear()
+        gameState.currentLevelId = 999
+        gameState.isExploding = false
+        gameState.isLevelCompleted = false
+        gameState.activeCheckpointIndex = -1
+        gameState.activeCheckpointX = null
+        gameState.activeCheckpointY = null
+        gameState.activeSwitches.clear()
+        gameState.activeBoss = null
+        gameState.bossProjectiles.clear()
         
         val level = LevelManager.loadLevelFromPath(context, path)
         if (level != null) {
@@ -746,7 +697,7 @@ class GameView @JvmOverloads constructor(
             val theme = level.theme ?: "industrial"
             applyTheme(theme)
             processLevelScaling()
-            activeBoss?.entranceProgress = if (showTransition) 0f else 1f
+            gameState.activeBoss?.entranceProgress = if (showTransition) 0f else 1f
             bgRenderer.initBgParticles(theme)
             transitionProgress = if (showTransition) 0f else 1f
             invalidate()
