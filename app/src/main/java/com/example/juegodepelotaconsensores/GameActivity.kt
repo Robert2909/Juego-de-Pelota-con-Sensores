@@ -55,6 +55,7 @@ class GameActivity : ComponentActivity(), SensorEventListener {
         controller.systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
 
         currentLevelId = intent.getIntExtra("LEVEL_ID", 1)
+        val debugLevelPath = intent.getStringExtra("DEBUG_LEVEL_PATH")
         
         // Bloquear la orientación actual (fijar si es landscape o reverse landscape)
         requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LOCKED
@@ -66,7 +67,11 @@ class GameActivity : ComponentActivity(), SensorEventListener {
             val context = androidx.compose.ui.platform.LocalContext.current
             val rememberedGameView = androidx.compose.runtime.remember {
                 GameView(context).apply {
-                    loadLevel(currentLevelId)
+                    if (debugLevelPath != null) {
+                        loadDebugLevel(debugLevelPath)
+                    } else {
+                        loadLevel(currentLevelId)
+                    }
                     onLevelComplete = { gameStatus = "WON" }
                     onLevelFailed = { gameStatus = "FAILED" }
                     gameView = this
@@ -103,7 +108,7 @@ class GameActivity : ComponentActivity(), SensorEventListener {
                                 Spacer(modifier = Modifier.height(16.dp))
                                 
                                 Text(
-                                     text = if (currentLevelId == 999) "NIVEL DEBUG" else "NIVEL $currentLevelId",
+                                     text = if (debugLevelPath != null || currentLevelId == 999) "NIVEL DEBUG" else "NIVEL $currentLevelId",
                                      fontSize = 14.sp,
                                      color = ModernSecondary,
                                      letterSpacing = 4.sp
@@ -113,11 +118,15 @@ class GameActivity : ComponentActivity(), SensorEventListener {
                                  
                                  Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
                                      val totalLevels = getLevelsCount()
-                                     if (currentLevelId == 999) {
+                                     if (debugLevelPath != null || currentLevelId == 999) {
                                          // En nivel debug, permitimos volver a jugar el mismo nivel de pruebas
                                          Button(
                                              onClick = { 
-                                                 gameView?.loadLevel(999)
+                                                 if (debugLevelPath != null) {
+                                                     gameView?.loadDebugLevel(debugLevelPath)
+                                                 } else {
+                                                     gameView?.loadLevel(999)
+                                                 }
                                                  gameStatus = "PLAYING"
                                              },
                                              colors = ButtonDefaults.buttonColors(containerColor = ModernAccent),

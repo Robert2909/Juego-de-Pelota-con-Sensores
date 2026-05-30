@@ -3,51 +3,24 @@ package com.example.juegodepelotaconsensores.engine
 import android.graphics.RectF
 import com.example.juegodepelotaconsensores.models.*
 
-class PhysicsState(
-    var posX: Float,
-    var posY: Float,
-    var velX: Float,
-    var velY: Float,
-    val radius: Float,
-    val tiltX: Float,
-    val tiltY: Float,
-    val physicalLevelWidth: Float,
-    val physicalLevelHeight: Float,
-    val EDITOR_WIDTH: Float,
-    val EDITOR_HEIGHT: Float,
-    var activeCheckpointIndex: Int,
-    var activeCheckpointX: Float?,
-    var activeCheckpointY: Float?,
-    val themeName: String,
-    val isExploding: Boolean,
-    var activeBoss: BossData?,
-    val goal: RectF,
-    val checkpoints: List<CheckpointData>,
-    val signalBus: Map<String, Boolean>,
-    val onTriggerDeath: () -> Unit,
-    val onLevelComplete: () -> Unit,
-    val onCheckpointActivated: () -> Unit,
-    val onTriggerCheckpointAnimation: (x: Float, y: Float) -> Unit,
-    val onTriggerSwitchAnimation: (x: Float, y: Float) -> Unit,
-    var portalCooldown: Float = 0f
-)
+
 
 object PhysicsEngine {
 
     fun update(
         state: PhysicsState,
         dt: Float,
-        walls: List<RectF>,
-        hazards: List<RectF>,
-        gates: List<GateData>,
-        switches: List<SwitchData>,
-        boxes: List<BoxData>,
-        logicGates: List<LogicGateData>,
-        movingEntities: List<MovingEntityData>,
-        spinningHazards: List<SpinningHazardData>,
-        windZones: List<WindZoneData>,
-        speedPads: List<SpeedPadData>,
-        portals: List<PortalData>,
+        walls: MutableList<RectF>,
+        hazards: MutableList<RectF>,
+        gates: MutableList<GateData>,
+        switches: MutableList<SwitchData>,
+        boxes: MutableList<BoxData>,
+        logicGates: MutableList<LogicGateData>,
+        movingEntities: MutableList<MovingEntityData>,
+        spinningHazards: MutableList<SpinningHazardData>,
+        windZones: MutableList<WindZoneData>,
+        speedPads: MutableList<SpeedPadData>,
+        portals: MutableList<PortalData>,
         bossProjectiles: MutableList<ProjectileData>,
         trailPoints: MutableList<TrailPoint>
     ) {
@@ -85,7 +58,7 @@ object PhysicsEngine {
                 }
                 
                 if (animationTime > 5500) {
-                    state.onLevelComplete()
+                    state.onLevelComplete.invoke()
                     return
                 }
             } else {
@@ -388,7 +361,7 @@ object PhysicsEngine {
             val distSq = dx * dx + dy * dy
             val colDist = state.radius + proj.radius
             if (distSq < colDist * colDist) {
-                state.onTriggerDeath()
+                state.onTriggerDeath.invoke()
                 return
             }
             
@@ -567,14 +540,14 @@ object PhysicsEngine {
         
         for (hazard in hazards) {
             if (RectF.intersects(hazard, finalRect)) {
-                state.onTriggerDeath()
+                state.onTriggerDeath.invoke()
                 return
             }
         }
 
         for (me in movingEntities) {
             if (me.isHazard && RectF.intersects(me.currentRect, finalRect)) {
-                state.onTriggerDeath()
+                state.onTriggerDeath.invoke()
                 return
             }
         }
@@ -586,7 +559,7 @@ object PhysicsEngine {
             val distanceSq = dx * dx + dy * dy
             val collisionDist = state.radius + saw.radius
             if (distanceSq < collisionDist * collisionDist) {
-                state.onTriggerDeath()
+                state.onTriggerDeath.invoke()
                 return
             }
         }
@@ -594,7 +567,7 @@ object PhysicsEngine {
         // Chequeo de colisión con el Jefe (mata al jugador al tocar)
         state.activeBoss?.let { boss ->
             if (!boss.isDefeated && boss.entranceProgress == 1f && RectF.intersects(boss.rect, finalRect)) {
-                state.onTriggerDeath()
+                state.onTriggerDeath.invoke()
                 return
             }
         }
@@ -602,7 +575,7 @@ object PhysicsEngine {
 
 
         if (RectF.intersects(state.goal, finalRect)) {
-            state.onLevelComplete()
+            state.onLevelComplete.invoke()
             return
         }
 
@@ -618,8 +591,8 @@ object PhysicsEngine {
                         state.activeCheckpointIndex = i
                         state.activeCheckpointX = cp.rect.centerX()
                         state.activeCheckpointY = cp.rect.centerY()
-                        state.onCheckpointActivated()
-                        state.onTriggerCheckpointAnimation(cp.rect.centerX(), cp.rect.centerY())
+                        state.onCheckpointActivated.invoke()
+                        state.onTriggerCheckpointAnimation.invoke(cp.rect.centerX(), cp.rect.centerY())
                     }
                 }
             }
@@ -673,9 +646,9 @@ object PhysicsEngine {
     private fun isBoxColliding(
         box: BoxData,
         testRect: RectF,
-        walls: List<RectF>,
-        gates: List<GateData>,
-        boxes: List<BoxData>,
+        walls: MutableList<RectF>,
+        gates: MutableList<GateData>,
+        boxes: MutableList<BoxData>,
         physicalLevelWidth: Float,
         physicalLevelHeight: Float
     ): Boolean {
@@ -735,10 +708,10 @@ object PhysicsEngine {
                 state.posX += normX * overlap
                 state.posY += normY * overlap
                 
-                if (normX < 0 && pushVelX != 0f) state.velX = pushVelX
-                if (normX > 0 && pushVelX != 0f) state.velX = pushVelX
-                if (normY < 0 && pushVelY != 0f) state.velY = pushVelY
-                if (normY > 0 && pushVelY != 0f) state.velY = pushVelY
+                if (normX < 0f && pushVelX != 0f) state.velX = pushVelX
+                if (normX > 0f && pushVelX != 0f) state.velX = pushVelX
+                if (normY < 0f && pushVelY != 0f) state.velY = pushVelY
+                if (normY > 0f && pushVelY != 0f) state.velY = pushVelY
             }
             return true
         }

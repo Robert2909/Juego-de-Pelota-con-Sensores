@@ -18,7 +18,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import com.example.juegodepelotaconsensores.ui.theme.*
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
@@ -44,11 +45,81 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = ModernDarkBg
                 ) {
-                    LevelSelectionScreen { levelId ->
-                        val intent = Intent(this, GameActivity::class.java).apply {
-                            putExtra("LEVEL_ID", levelId)
+                    var showDebugMenu by rememberSaveable { mutableStateOf(false) }
+                    
+                    Box(modifier = Modifier.fillMaxSize()) {
+                        LevelSelectionScreen { levelId ->
+                            val intent = Intent(this@MainActivity, GameActivity::class.java).apply {
+                                putExtra("LEVEL_ID", levelId)
+                            }
+                            startActivity(intent)
                         }
-                        startActivity(intent)
+
+                        // Botón flotante para el menú debug temporal
+                        Box(
+                            modifier = Modifier.fillMaxSize().padding(16.dp),
+                            contentAlignment = Alignment.TopEnd
+                        ) {
+                            TextButton(onClick = { showDebugMenu = true }) {
+                                Text("DEBUG", color = ModernSecondary.copy(alpha = 0.5f), fontWeight = FontWeight.Bold)
+                            }
+                        }
+
+                        if (showDebugMenu) {
+                            var debugLevels by remember { mutableStateOf<List<String>>(emptyList()) }
+                            LaunchedEffect(Unit) {
+                                debugLevels = try {
+                                    assets.list("levels/debug")?.filter { it.endsWith(".json") }?.map { it.removeSuffix(".json") } ?: emptyList()
+                                } catch (e: Exception) {
+                                    emptyList()
+                                }
+                            }
+                            
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .background(Color.Black.copy(alpha = 0.95f)),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Column(
+                                    modifier = Modifier.fillMaxWidth(0.6f).fillMaxHeight(0.8f),
+                                    horizontalAlignment = Alignment.CenterHorizontally
+                                ) {
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(), 
+                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Text("DEBUG LEVELS", color = ModernSuccess, fontSize = 24.sp, fontWeight = FontWeight.Bold)
+                                        TextButton(onClick = { showDebugMenu = false }) {
+                                            Text("X", color = Color.White, fontSize = 20.sp)
+                                        }
+                                    }
+                                    Spacer(modifier = Modifier.height(16.dp))
+                                    androidx.compose.foundation.lazy.LazyColumn(
+                                        modifier = Modifier.fillMaxSize(),
+                                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                                    ) {
+                                        items(debugLevels.size) { index ->
+                                            val levelName = debugLevels[index]
+                                            Button(
+                                                onClick = {
+                                                    val intent = Intent(this@MainActivity, GameActivity::class.java).apply {
+                                                        putExtra("DEBUG_LEVEL_PATH", "levels/debug/$levelName.json")
+                                                    }
+                                                    startActivity(intent)
+                                                },
+                                                modifier = Modifier.fillMaxWidth(),
+                                                colors = ButtonDefaults.buttonColors(containerColor = ModernAccent),
+                                                shape = RoundedCornerShape(8.dp)
+                                            ) {
+                                                Text(levelName.uppercase(), color = ModernDarkBg, fontWeight = FontWeight.Bold)
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -96,23 +167,6 @@ fun LevelSelectionScreen(onLevelSelected: (Int) -> Unit) {
         }
 
         Spacer(modifier = Modifier.height(24.dp))
-
-        // --- BOTÓN DE DEPURACIÓN (MECÁNICA TEMPORAL PARA PRUEBAS) ---
-        OutlinedButton(
-            onClick = { onLevelSelected(999) },
-            border = BorderStroke(1.dp, Color(0xFF4facfe)),
-            shape = RoundedCornerShape(4.dp),
-            modifier = Modifier.widthIn(min = 200.dp)
-        ) {
-            Text(
-                text = "PROBAR NIVEL DEBUG",
-                color = Color(0xFF4facfe),
-                fontWeight = FontWeight.Medium,
-                fontSize = 13.sp,
-                letterSpacing = 2.sp
-            )
-        }
-        // -------------------------------------------------------------
         
         Spacer(modifier = Modifier.weight(1f))
         

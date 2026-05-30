@@ -9,8 +9,14 @@ import java.io.InputStream
 object LevelManager {
     fun loadLevel(context: Context, levelId: Int): Level? {
         val fileName = if (levelId == 999) "levels/level_debug.json" else "levels/level_$levelId.json"
+        val level = loadLevelFromPath(context, fileName)
+        if (level != null) level.id = levelId
+        return level
+    }
+
+    fun loadLevelFromPath(context: Context, path: String): Level? {
         return try {
-            val inputStream: InputStream = context.assets.open(fileName)
+            val inputStream: InputStream = context.assets.open(path)
             val jsonString = inputStream.bufferedReader().use { it.readText() }
             val json = JSONObject(jsonString)
             
@@ -57,7 +63,7 @@ object LevelManager {
                     name, bossType, health, phases, attackDensity, attackFrequency, specialAttackFrequency
                 ))
             }
-            Level(levelId, theme, rawEntities, levelWidth, levelHeight)
+            Level(-1, theme, rawEntities, levelWidth, levelHeight)
         } catch (e: Exception) {
             e.printStackTrace()
             null

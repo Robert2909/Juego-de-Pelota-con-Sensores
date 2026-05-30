@@ -289,7 +289,12 @@ class GameView @JvmOverloads constructor(
         if (progress >= 1f) {
             isExploding = false
             if (activeCheckpointIndex == -1) {
-                loadLevel(currentLevelId, showTransition = false)
+                onLevelFailed?.invoke()
+                if (currentLevelId == 999 && currentDebugPath != null) {
+                    loadDebugLevel(currentDebugPath!!, showTransition = false)
+                } else {
+                    loadLevel(currentLevelId, showTransition = false)
+                }
             } else {
                 resetBall(isDeathRespawn = true)
             }
@@ -720,4 +725,31 @@ class GameView @JvmOverloads constructor(
         }
     }
 
+    var currentDebugPath: String? = null
+
+    fun loadDebugLevel(path: String, showTransition: Boolean = true) {
+        currentDebugPath = path
+        this.currentLevelId = 999
+        isExploding = false
+        isLevelCompleted = false
+        activeCheckpointIndex = -1
+        activeCheckpointX = null
+        activeCheckpointY = null
+        activeSwitches.clear()
+        activeBoss = null
+        bossProjectiles.clear()
+        
+        val level = LevelManager.loadLevelFromPath(context, path)
+        if (level != null) {
+            level.id = 999
+            currentLevel = level
+            val theme = level.theme ?: "industrial"
+            applyTheme(theme)
+            processLevelScaling()
+            activeBoss?.entranceProgress = if (showTransition) 0f else 1f
+            bgRenderer.initBgParticles(theme)
+            transitionProgress = if (showTransition) 0f else 1f
+            invalidate()
+        }
+    }
 }
