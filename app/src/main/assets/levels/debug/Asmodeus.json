@@ -1,6 +1,6 @@
 {
     "levelId": 999,
-    "theme": "industrial",
+    "theme": "inferno",
     "width": 3840,
     "height": 2160,
     "gridCols": 192,
@@ -32,7 +32,7 @@
         {
             "type": "switch",
             "x": 1880,
-            "y": 240,
+            "y": 230,
             "w": 80,
             "h": 80,
             "switchMode": "pulse",
@@ -40,7 +40,7 @@
         },
         {
             "type": "switch",
-            "x": 440,
+            "x": 600,
             "y": 1040,
             "w": 80,
             "h": 80,
@@ -50,7 +50,7 @@
         {
             "type": "switch",
             "x": 1880,
-            "y": 1840,
+            "y": 1850,
             "w": 80,
             "h": 80,
             "switchMode": "pulse",
